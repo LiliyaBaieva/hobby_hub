@@ -1,0 +1,72 @@
+{% extends "school_admin/base.html" %}
+
+{% block content %}
+<style>
+    h1 { text-align: center; color: #1e90ff; margin-bottom: 30px; }
+    table { width: 100%; border-collapse: collapse; background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+    th, td { padding: 12px 15px; border: 1px solid #eee; text-align: left; }
+    th { background: #1e90ff; color: white; font-weight: bold; }
+    tr:nth-child(even) { background-color: #f9f9f9; }
+    
+    .action-link { text-decoration: none; font-size: 0.9em; font-weight: bold; margin: 0 5px; }
+    .edit-link { color: #1e90ff; }
+    .delete-link { color: #d32f2f; }
+
+    .form-section { margin-top: 40px; background: white; padding: 25px; border-radius: 15px; border: 1px solid #ddd; }
+    button { background: #32cd32; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; margin-top: 10px; }
+</style>
+
+<h1>🎓 Список усіх учнів</h1>
+
+<table>
+    <thead>
+        <tr>
+            <th>ПІБ Учня</th>
+            <th>Вік</th>
+            <th>Клас</th>
+            <th>Гурток (Заняття)</th>
+            {% if user.is_staff %}
+                <th style="width: 180px; text-align: center;">Дії</th>
+            {% endif %}
+        </tr>
+    </thead>
+    <tbody>
+        {% for s in students %}
+        <tr>
+            <td><strong>{{ s.full_name }}</strong></td>
+            <td>{{ s.age }}</td>
+            <td>{{ s.school_class }}</td>
+            <td>
+                {{ s.lesson.name }} 
+                <br>
+                <small style="color: #666;">
+                    ({{ s.lesson.teacher.last_name }} {{ s.lesson.teacher.first_name|slice:":1" }}. {{ s.lesson.teacher.middle_name|slice:":1" }}.)
+                </small>
+            </td>
+            {% if user.is_staff %}
+            <td style="text-align: center;">
+                <a href="{% url 'edit_student' s.pk %}" class="action-link edit-link">✏️</a>
+                <span style="color: #ccc;">|</span>
+                <a href="{% url 'delete_student' s.pk %}" class="action-link delete-link" onclick="return confirm('Видалити?')">🗑️  </a>
+            </td>
+            {% endif %}
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="{% if user.is_staff %}5{% else %}4{% endif %}" style="text-align: center; color: #999; padding: 20px;">
+                Учнів поки не зареєстровано. Заповніть форму нижче!
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<div class="form-section">
+    <h3>✨ Записати нового учня</h3>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Записати учня 🚀</button>
+    </form>
+</div>
+{% endblock %}

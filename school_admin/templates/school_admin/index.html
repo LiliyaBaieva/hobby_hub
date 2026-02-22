@@ -1,0 +1,115 @@
+{% extends "school_admin/base.html" %}
+
+{% block content %}
+<style>
+    /* Повертаємо стиль карток */
+    .container { 
+        display: flex; 
+        flex-wrap: wrap; 
+        justify-content: center; 
+        gap: 25px; 
+        padding: 20px;
+    }
+    
+    .card { 
+        background: white; 
+        border-radius: 20px; 
+        padding: 25px; 
+        width: 300px; 
+        border: 3px solid #ffd700; 
+        box-shadow: 0 8px 15px rgba(0,0,0,0.1); 
+        transition: transform 0.3s;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+    
+    .card:hover { 
+        transform: translateY(-10px); 
+        border-color: #ff4500;
+    }
+    
+    .card h2 { 
+        margin-top: 0; 
+        color: #1e90ff; 
+        font-size: 1.5em;
+    }
+    
+    .card p { 
+        color: #555; 
+        line-height: 1.6; 
+    }
+
+    .btn-enroll { 
+        display: block; 
+        background: #32cd32; 
+        color: white; 
+        text-align: center; 
+        padding: 12px; 
+        border-radius: 10px; 
+        text-decoration: none; 
+        font-weight: bold;
+        margin-top: 15px;
+    }
+
+    .btn-enroll:hover { background: #28a745; }
+
+    /* Кнопки керування для адміна */
+    .admin-controls {
+        margin-top: 15px;
+        padding-top: 15px;
+        border-top: 1px dashed #ddd;
+        text-align: center;
+        font-size: 0.9em;
+    }
+
+    .form-add-lesson {
+        max-width: 600px;
+        margin: 40px auto;
+        background: #fff9e6;
+        padding: 30px;
+        border-radius: 20px;
+        border: 2px dashed #ff8c00;
+    }
+</style>
+
+<h1 style="text-align: center; font-size: 2.5em; color: #ff4500; text-shadow: 2px 2px #fff;">🌟 Наші Гуртки 🌟</h1>
+
+<div class="container">
+    {% for lesson in lessons %}
+    <div class="card">
+        <div>
+            <h2>{{ lesson.name }}</h2>
+            <p>👤 <strong>Викладач:</strong> {{ lesson.teacher.last_name }} {{ lesson.teacher.first_name }}</p>
+            <p>{{ lesson.description }}</p>
+        </div>
+        
+        <div>
+            <a href="{% url 'student_list' %}" class="btn-enroll">Записатись 🚀</a>
+            
+            {% if user.is_staff %}
+            <div class="admin-controls">
+                <a href="{% url 'edit_lesson' lesson.pk %}" style="color: #1e90ff; text-decoration: none;">✏️ Редагувати</a> 
+                <span style="margin: 0 10px; color: #ccc;">|</span>
+                <a href="{% url 'delete_lesson' lesson.pk %}" style="color: #d32f2f; text-decoration: none;" onclick="return confirm('Видалити цей гурток?')">🗑️ Видалити</a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    {% empty %}
+    <p style="text-align: center; font-size: 1.2em; color: #666;">Наразі гуртків немає. Адмін, додай перший! 👇</p>
+    {% endfor %}
+</div>
+
+{% if user.is_staff %}
+<div class="form-add-lesson">
+    <h2 style="color: #ff8c00; margin-top: 0;">✨ Створити новий гурток</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="admin-btn" style="width: 100%; margin-top: 10px;">Додати гурток 🎨</button>
+    </form>
+</div>
+{% endif %}
+
+{% endblock %}

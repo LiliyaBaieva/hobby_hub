@@ -1,0 +1,26 @@
+# База даних (КРИТИЧНО: ніколи не завантажуйте її на GitHub)
+db.sqlite3
+
+# Тимчасові файли Python (кеш)
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Віртуальне середовище (займає багато місця, встановлюється через requirements.txt)
+venv/
+env/
+ENV/
+.env
+
+# Файли IDE (Visual Studio Code, PyCharm)
+.vscode/
+.idea/
+*.swp
+
+# Медіа-файли та статика (якщо будете додавати фото)
+media/
+static_cdn/
+
+# Системні файли
+.DS_Store
+thumbs.db

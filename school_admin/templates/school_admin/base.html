@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <title>Школа Гуртків</title>
+    <style>
+        /* Загальні стилі */
+        body { font-family: 'Comic Sans MS', cursive, sans-serif; background: #f0f8ff; padding: 20px; color: #333; }
+        
+        /* Навігація */
+        nav { 
+            background: #fff; 
+            padding: 15px 25px; 
+            border-radius: 15px; 
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1); 
+            margin-bottom: 30px; 
+        }
+        nav a { text-decoration: none; color: #1e90ff; font-weight: bold; font-size: 1.1em; transition: 0.3s; }
+        nav a:hover { color: #ff4500; }
+
+        /* Кнопки Адміна */
+        .admin-btn { 
+            background: #ff4500; 
+            color: white !important; 
+            padding: 8px 18px; 
+            border-radius: 20px; 
+            border: none;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: bold;
+        }
+        .logout-btn { 
+            background: #6c757d; 
+            color: white !important; 
+            padding: 8px 18px; 
+            border-radius: 20px; 
+            border: none;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: bold;
+            font-family: inherit;
+        }
+        .admin-btn:hover, .logout-btn:hover { opacity: 0.9; transform: scale(1.05); }
+
+        /* Стилі для таблиць (спільні для всіх сторінок) */
+        table { width: 100%; border-collapse: collapse; background: white; border-radius: 12px; overflow: hidden; margin-top: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        th, td { padding: 12px 15px; border: 1px solid #eee; text-align: left; }
+        th { background: #1e90ff; color: white; }
+        tr:nth-child(even) { background-color: #fcfcfc; }
+
+        /* Заголовки */
+        h1 { text-align: center; color: #ff4500; }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <a href="{% url 'index' %}">🏠 Головна</a>
+        <a href="{% url 'teacher_list' %}">👩‍🏫 Викладачі</a>
+        <a href="{% url 'student_list' %}">🎓 Учні</a>
+        
+        {% if user.is_authenticated %}
+            <form action="/admin/logout/" method="post" style="display: inline;">
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{% url 'index' %}">
+                <button type="submit" class="logout-btn">
+                    🚪 Вийти ({{ user.username }})
+                </button>
+            </form>
+        {% else %}
+            <a href="/admin/login/?next={{ request.path }}" class="admin-btn">🔑 Адміністратор</a>
+        {% endif %}
+    </nav>
+
+    <div class="container">
+        {% block content %}{% endblock %}
+    </div>
+
+</body>
+</html>
