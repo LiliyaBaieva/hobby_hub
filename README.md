@@ -29,8 +29,30 @@
 
 Для запуску проєкту на локальній машині виконайте наступні кроки:
 
-1. **Клонуйте репозиторій:**
+1. **Клонуйте [репозиторій](https://github.com/LiliyaBaieva/hobby_hub.git):**
 
    ```bash
-   git clone [https://github.com/LiliyaBaieva/hobby_hub.git](https://github.com/LiliyaBaieva/hobby_hub.git)
+   git clone https://github.com/LiliyaBaieva/hobby_hub.git
+
    cd hobby_hub
+   
+2. Створіть та активуйте віртуальне середовище:
+
+    ```bash
+    python -m venv venv
+    # Для Windows:
+    source venv/Scripts/activate
+
+3. Встановіть необхідні залежності:
+
+    ```bash
+    pip install -r requirements.txt
+
+4. Виконайте міграції бази даних:
+
+    ```bash
+    python manage.py migrate
+
+5. Запустіть сервер:
+    ```bash
+    python manage.py runserver
