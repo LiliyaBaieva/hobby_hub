@@ -3,62 +3,79 @@ from django.contrib.admin.views.decorators import staff_member_required
 from .models import Teacher, ExtraLesson, Student
 from .forms import TeacherForm, LessonForm, EnrollmentForm
 
-# ГОЛОВНА (ЗАНЯТТЯ)
+# ГОЛОВНА (ЗАНЯТТЯ) з пошуком
 def index(request):
+    query = request.GET.get('q')
+    if query:
+        lessons = ExtraLesson.objects.filter(name__icontains=query)
+    else:
+        lessons = ExtraLesson.objects.all()
+
     if request.method == 'POST' and request.user.is_staff:
         form = LessonForm(request.POST)
         if form.is_valid():
             form.save()
             return redirect('index')
     
-    lessons = ExtraLesson.objects.all()
     form = LessonForm() if request.user.is_staff else None
     return render(request, 'school_admin/index.html', {
         'lessons': lessons, 
-        'form': form
+        'form': form,
+        'query': query
     })
 
-# ВИКЛАДАЧІ
+# ВИКЛАДАЧІ з пошуком
 def teacher_list(request):
+    query = request.GET.get('q')
+    if query:
+        teachers = Teacher.objects.filter(last_name__icontains=query) | Teacher.objects.filter(first_name__icontains=query)
+    else:
+        teachers = Teacher.objects.all()
+
     if request.method == 'POST' and request.user.is_staff:
         form = TeacherForm(request.POST)
         if form.is_valid():
             form.save()
             return redirect('teacher_list')
     
-    teachers = Teacher.objects.all()
     form = TeacherForm() if request.user.is_staff else None
     return render(request, 'school_admin/teachers.html', {
         'teachers': teachers, 
-        'form': form
+        'form': form,
+        'query': query
     })
 
-# УЧНІ (ОДНА ТАБЛИЦЯ)
+# УЧНІ з пошуком та фільтрацією
 def student_list(request):
-    # Логіка для обробки форми (POST)
-    if request.method == 'POST':
+    query = request.GET.get('q')
+    lesson_id = request.GET.get('lesson')
+    
+    students = Student.objects.all().select_related('lesson__teacher')
+    
+    if query:
+        students = students.filter(full_name__icontains=query)
+    if lesson_id:
+        students = students.filter(lesson_id=lesson_id)
+
+    if request.method == 'POST' and request.user.is_staff:
         form = EnrollmentForm(request.POST)
         if form.is_valid():
             form.save()
             return redirect('student_list')
     
-    # Логіка для відображення сторінки (GET)
-    # Отримуємо всіх учнів з бази
-    all_students = Student.objects.all().select_related('lesson__teacher')
-    
-    # Також отримуємо заняття, якщо вони потрібні для форми
     lessons = ExtraLesson.objects.all()
     form = EnrollmentForm()
     
-    # Передаємо в шаблон змінну 'students' (саме її ми використовуємо в циклі {% for s in students %})
-    context = {
-        'students': all_students,
+    return render(request, 'school_admin/students.html', {
+        'students': students,
         'lessons': lessons,
-        'form': form
-    }
-    return render(request, 'school_admin/students.html', context)
+        'form': form,
+        'query': query,
+        'selected_lesson': lesson_id
+    })
 
-# --- РЕДАГУВАННЯ ТА ВИДАЛЕННЯ УЧНІВ ---
+# --- РЕДАГУВАННЯ ТА ВИДАЛЕННЯ ---
+
 @staff_member_required
 def edit_student(request, pk):
     student = get_object_or_404(Student, pk=pk)
@@ -69,17 +86,13 @@ def edit_student(request, pk):
             return redirect('student_list')
     else:
         form = EnrollmentForm(instance=student)
-    return render(request, 'school_admin/edit_form.html', {
-        'form': form, 
-        'title': 'Редагувати дані учня'
-    })
+    return render(request, 'school_admin/edit_form.html', {'form': form, 'title': 'Редагувати учня'})
 
 @staff_member_required
 def delete_student(request, pk):
     get_object_or_404(Student, pk=pk).delete()
     return redirect('student_list')
 
-# --- CRUD ДЛЯ ВИКЛАДАЧІВ ТА ЗАНЯТЬ ---
 @staff_member_required
 def edit_teacher(request, pk):
     teacher = get_object_or_404(Teacher, pk=pk)
@@ -96,6 +109,7 @@ def delete_teacher(request, pk):
     get_object_or_404(Teacher, pk=pk).delete()
     return redirect('teacher_list')
 
+# САМЕ ЦІЄЇ ФУНКЦІЇ У ТЕБЕ НЕ ВИСТАЧАЛО:
 @staff_member_required
 def edit_lesson(request, pk):
     lesson = get_object_or_404(ExtraLesson, pk=pk)
