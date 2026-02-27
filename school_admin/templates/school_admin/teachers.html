@@ -1,19 +1,95 @@
 {% extends "school_admin/base.html" %}
+
 {% block content %}
+<style>
+    h1 { text-align: center; color: #1e90ff; margin-bottom: 30px; }
+    table { width: 100%; border-collapse: collapse; background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+    th, td { padding: 12px 15px; border: 1px solid #eee; text-align: left; }
+    th { background: #1e90ff; color: white; font-weight: bold; }
+    tr:nth-child(even) { background-color: #f9f9f9; }
+    
+    /* Стиль для пошуку */
+    .search-container {
+        margin-bottom: 25px;
+        text-align: center;
+        background: #f0f8ff;
+        padding: 20px;
+        border-radius: 15px;
+        border: 1px solid #1e90ff;
+    }
+    .search-container input {
+        padding: 10px;
+        width: 300px;
+        border-radius: 8px;
+        border: 1px solid #ddd;
+    }
+    .btn-search {
+        background: #1e90ff;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: bold;
+    }
+
+    .form-section { margin-top: 40px; background: white; padding: 25px; border-radius: 15px; border: 1px solid #ddd; }
+    .btn-save { background: #32cd32; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; margin-top: 10px; }
+</style>
+
 <h1>👩‍🏫 Наші викладачі</h1>
-<table>
-    <tr><th>Ім'я</th><th>Опис</th>{% if user.is_staff %}<th>Дії</th>{% endif %}</tr>
-    {% for t in teachers %}
-    <tr>
-        <td>{{ t.last_name }} {{ t.first_name }} {{ t.middle_name|default:"" }}</td>
-        <td>{{ t.description }}</td>
-        {% if user.is_staff %}
-        <td>
-            <a href="{% url 'edit_teacher' t.pk %}">✏️</a> | 
-            <a href="{% url 'delete_teacher' t.pk %}" style="color:red;">🗑️</a>
-        </td>
+
+<div class="search-container">
+    <form method="get" action="">
+        <input type="text" name="q" value="{{ query|default:'' }}" placeholder="Пошук за прізвищем...">
+        <button type="submit" class="btn-search">Знайти 🔍</button>
+        {% if query %}
+            <a href="{% url 'teacher_list' %}" style="margin-left: 10px; color: #666; text-decoration: none;">Скинути</a>
         {% endif %}
-    </tr>
-    {% endfor %}
+    </form>
+</div>
+
+<table>
+    <thead>
+        <tr>
+            <th>Прізвище, Ім'я, По батькові</th>
+            <th>Опис</th>
+            {% if user.is_staff %}
+                <th style="width: 150px; text-align: center;">Дії</th>
+            {% endif %}
+        </tr>
+    </thead>
+    <tbody>
+        {% for t in teachers %}
+        <tr>
+            <td><strong>{{ t.last_name }}</strong> {{ t.first_name }} {{ t.middle_name|default:"" }}</td>
+            <td>{{ t.description }}</td>
+            {% if user.is_staff %}
+            <td style="text-align: center;">
+                <a href="{% url 'edit_teacher' t.pk %}" style="text-decoration: none;">✏️</a> | 
+                <a href="{% url 'delete_teacher' t.pk %}" style="color:red; text-decoration: none;" onclick="return confirm('Видалити?')">🗑️</a>
+            </td>
+            {% endif %}
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="3" style="text-align: center; padding: 20px; color: #999;">
+                Викладачів не знайдено за вашим запитом.
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
 </table>
+
+{% if user.is_staff %}
+<div class="form-section">
+    <h3>✨ Додати нового викладача</h3>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn-save">Зберегти викладача 🚀</button>
+    </form>
+</div>
+{% endif %}
+
 {% endblock %}

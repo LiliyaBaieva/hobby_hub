@@ -2,7 +2,7 @@
 
 {% block content %}
 <style>
-    /* Повертаємо стиль карток */
+    /* Твій оригінальний стиль карток */
     .container { 
         display: flex; 
         flex-wrap: wrap; 
@@ -71,9 +71,44 @@
         border-radius: 20px;
         border: 2px dashed #ff8c00;
     }
+
+    /* Стиль для пошуку (у твоєму стилі) */
+    .search-bar {
+        text-align: center;
+        margin: 20px auto;
+        padding: 15px;
+        background: #f0f8ff;
+        border-radius: 50px;
+        max-width: 500px;
+        border: 2px solid #1e90ff;
+    }
+    .search-input {
+        padding: 10px;
+        border-radius: 20px;
+        border: 1px solid #ddd;
+        width: 60%;
+    }
+    .search-btn {
+        padding: 10px 20px;
+        border-radius: 20px;
+        background: #1e90ff;
+        color: white;
+        border: none;
+        cursor: pointer;
+    }
 </style>
 
 <h1 style="text-align: center; font-size: 2.5em; color: #ff4500; text-shadow: 2px 2px #fff;">🌟 Наші Гуртки 🌟</h1>
+
+<div class="search-bar">
+    <form method="get" action="">
+        <input type="text" name="q" class="search-input" value="{{ query|default:'' }}" placeholder="Знайти цікавий гурток...">
+        <button type="submit" class="search-btn">Шукати 🔍</button>
+        {% if query %}
+            <br><a href="{% url 'index' %}" style="color: #666; font-size: 0.8em;">Скинути пошук</a>
+        {% endif %}
+    </form>
+</div>
 
 <div class="container">
     {% for lesson in lessons %}
@@ -97,7 +132,13 @@
         </div>
     </div>
     {% empty %}
-    <p style="text-align: center; font-size: 1.2em; color: #666;">Наразі гуртків немає. Адмін, додай перший! 👇</p>
+    <p style="text-align: center; font-size: 1.2em; color: #666;">
+        {% if query %}
+            Нічого не знайдено за запитом "{{ query }}". Спробуй інше слово! 🎈
+        {% else %}
+            Наразі гуртків немає. Адмін, додай перший! 👇
+        {% endif %}
+    </p>
     {% endfor %}
 </div>
 
@@ -107,7 +148,9 @@
     <form method="post">
         {% csrf_token %}
         {{ form.as_p }}
-        <button type="submit" class="admin-btn" style="width: 100%; margin-top: 10px;">Додати гурток 🎨</button>
+        <button type="submit" style="width: 100%; margin-top: 10px; background: #ff8c00; color: white; padding: 15px; border-radius: 15px; border: none; font-weight: bold; cursor: pointer;">
+            Додати гурток 🎨
+        </button>
     </form>
 </div>
 {% endif %}
